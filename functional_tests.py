@@ -39,7 +39,7 @@ class NewVisitorTest(unittest.TestCase):
 		# Alice hits enter, the page updates and it shows "buy feta cheese" 
 		# in her to-do list
 		inputbox.send_keys(Keys.ENTER)
-		self.check_for_row_in_list_table('1: by feta cheese')
+		self.check_for_row_in_list_table('1: buy feta cheese')
 		
 		# Alice can see that there's still a text box and she enters "buy meat"
 		inputbox = self.browser.find_element_by_id('id_new_item')
@@ -48,8 +48,8 @@ class NewVisitorTest(unittest.TestCase):
 
 
 		# The page updates again, and now shows both items on her list
-		self.check_for_row_in_list_table('1: buy feta cheese')
 		self.check_for_row_in_list_table('2: buy meat')
+		self.check_for_row_in_list_table('1: buy feta cheese')
 
 		# Alice wonders if the site will remember her list. Then she sees 
 		# that the site has generated a unique URL for her -- there is 
