@@ -37,9 +37,12 @@ class NewVisitorTest(LiveServerTestCase):
 		# Alice types "buy feta cheess" into a text box
 		inputbox.send_keys('buy feta cheese')
 
-		# Alice hits enter, the page updates and it shows "buy feta cheese" 
-		# in her to-do list
+		# Alice hits enter, she is taken to a new URL
+		# and now the pages lists "1: buy feta cheese" 
+		# as an item in a to-do list		
 		inputbox.send_keys(Keys.ENTER)
+		alice_list_url = self.browser.current_url
+		self.assertRegex(alice_list_url, '/lists/.+')
 		self.check_for_row_in_list_table('1: buy feta cheese')
 		
 		# Alice can see that there's still a text box and she enters "buy meat"
@@ -52,11 +55,32 @@ class NewVisitorTest(LiveServerTestCase):
 		self.check_for_row_in_list_table('2: buy meat')
 		self.check_for_row_in_list_table('1: buy feta cheese')
 
-		# Alice wonders if the site will remember her list. Then she sees 
-		# that the site has generated a unique URL for her -- there is 
-		# some explanatory text to that effect.
-		self.fail('Finish the test !')
+		#Now a new user, Cicci, comes along to the site.
 
-# She visits that URL - her to-do list is still there.
+		## We use a new browser session to make sure that no information
+		## of Alice's is coming throuhg from cookies etc
+		self.browser.quit()
+		self.browser = webdriver.Firefox()
 
-# Satisfied, she goes on with her day
+		# Cicci visits the home page. There is no sign of Alice's list
+		self.browser.get(self.live_server_url)
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('buy feeto cheese', page_text)
+		self.assertNotIn('buy meat', page_text)
+
+		# Cicci starts a new list by entering a new item.
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('buy almond milk')
+		inputbox.send_keys(Keys.ENTER)
+
+		# Cicci gets her own unique URL 
+		cicci_list_url = self.browser.current_url
+		self.assertRegex(cicci_list_url, '/lists/.+')
+		self.assertNotEqual(cicci_list_url, alice_list_url)
+
+		# Again, there is not trace of Alice's list
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('buy feta cheese', page_text)
+		self.assertIn('buy almond milk', page_text)
+
+	# Satisfied, they both go on with their day
